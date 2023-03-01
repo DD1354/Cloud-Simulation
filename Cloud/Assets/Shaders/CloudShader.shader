@@ -3,15 +3,17 @@ Shader "Custom/CloudShader"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Density ("Density", Range(0,1)) = 0.5
+        _Density ("Density", Range(0.1,1)) = 0.5
 
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" }
+        Tags { "Queue"="Transparent" "RenderType"="Transparent" }
         LOD 100
         
         Zwrite Off
+        Cull Off
+        ZTest Always
         Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
@@ -47,7 +49,7 @@ Shader "Custom/CloudShader"
             float3 boundsMin = float3(-0.5,-0.5,-0.5);
             float3 boundsMax = float3(0.5,0.5,0.5);
             float _Density;
-            float lightAbsorptionTowardSun = 0.1;
+            float lightAbsorptionTowardSun = 1;
 
             v2f vert (appdata v)
             {
@@ -67,6 +69,10 @@ Shader "Custom/CloudShader"
             float beersLaw(float d) {
                 float beer = exp(-d);
                 return beer;
+            }
+
+            float2 cRaycRay(){
+                
             }
 
             // Returns (dstToBox, dstInsideBox). If ray misses box, dstInsideBox will be zero
@@ -96,12 +102,13 @@ Shader "Custom/CloudShader"
 
             float lightMarch(float3 marchPoint){
 
+                //return 3;
                 float3 dirToLight = _WorldSpaceLightPos0.xyz;
+                float vvvvvv = normalize(marchPoint-dirToLight);
 
                 // get distance to exit
-                float dstInsideBox = rayBoxDst(boundsMin, boundsMax, marchPoint, 1/dirToLight).y;
+                float dstInsideBox = rayBoxDst(boundsMin, boundsMax, marchPoint, 1/vvvvvv).y;
                 //float totalDistance = dstInsideBox.y - dstInsideBox.x;
-
 
                 float transmittance = 1;
                 float totalDensity = 0;
@@ -118,6 +125,7 @@ Shader "Custom/CloudShader"
                     //totalDensity += max(0, density * stepSize);
                     marchPoint += dirToLight * STEP_DIST;
                 }
+                
 
                 transmittance = beersLaw(totalDensity*lightAbsorptionTowardSun);
 
@@ -126,40 +134,59 @@ Shader "Custom/CloudShader"
 
             }
 
-            float boxMarch(float3 entryPoint, float3 rayDir, float entryDistance, float exitDistance){
+            float4 boxMarch(float3 entryPoint, float3 rayDir, float entryDistance, float exitDistance){
 
                 // Find the maximum distance to travel
-                float maxDistance = exitDistance - entryDistance;
+                float maxDistance = entryDistance - exitDistance;
+                
                 float transmittance = 1;
+                float lightTransmittance = 0;
                 float density = _Density;
                 float3 lightEnergy = 0;
+                float stepSize = 0.5;
+                float dstTravelled = 0;
 
-                // Here we march through the box with a set step size
-                for(int travelDistance = 0; travelDistance < exitDistance; travelDistance = STEP_DIST){
-
-                    float3 rayPosition = entryPoint + rayDir * travelDistance;
-
-                    // Calculate the light transmittance at the specified point
-                    float lightTransmittance = lightMarch(rayPosition);
-
-                    lightEnergy += density * STEP_DIST * transmittance * lightTransmittance;
-                    transmittance *= exp(-density * STEP_DIST);
-                    // effect total transmittance in some way
-
+                /*
+                for(int i = 0; i < 5; i ++){
+                    transmittance *= exp(-density * stepSize);
                 }
 
-                return transmittance;
+                return float4(lightEnergy, transmittance);
+                */
+
+                // Here we march through the box with a set step size
+                for(int travelDistance = 0; travelDistance < maxDistance; travelDistance += stepSize){
+
+                    
+                    float3 rayPosition = entryPoint + rayDir * travelDistance;
+                    
+                    // Calculate the light transmittance at the specified point
+
+
+                    if (density > 0) {
+
+                        lightTransmittance = lightMarch(rayPosition);
+                        lightEnergy += density * stepSize * transmittance * lightTransmittance;
+                        transmittance *= exp(-density * stepSize);
+                    
+                        if (transmittance < 0.01) {
+                            break;
+                        }
+                    }
+
+                }
+                
+                return float4(lightEnergy, transmittance);
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-
                 float2 uv = i.uv-0.5;
                 float3 rayorigin = i.ro;
                 float3 raydirection = (normalize(i.hitPos-rayorigin));
 
                 // Find the distances to the entry and exit of the box
-                float2 rayHitAndExitDist = rayBoxDst(boundsMin,boundsMax,rayorigin,raydirection);
+                float2 rayHitAndExitDist = rayBoxDst(boundsMin,boundsMax,rayorigin,1/raydirection);
                 float rayHitDist = rayHitAndExitDist.x;
                 float rayExitDist = rayHitAndExitDist.y;
 
@@ -169,19 +196,19 @@ Shader "Custom/CloudShader"
                 // Point of exit
                 float3 rayExit = rayorigin + raydirection * rayExitDist;
 
-                float transmittance = boxMarch(rayhit,raydirection,boundsMin,boundsMax);
+                float4 lightAndTransmittance = boxMarch(rayhit,raydirection,rayHitDist,rayExitDist);
 
-                fixed4 col = 0;
-                //col += transmittance;
-                col.a = 1;
+                fixed4 col = float4(lightAndTransmittance.x,lightAndTransmittance.y,lightAndTransmittance.z,1);
+                //if(lightAndTransmittance.w>0) col = 1;
+                //else 
+                float a;
+                if(lightAndTransmittance.w = 1){
+                    a = 1;
+                }else a = 0;
+                //float cloud = 0.1 - lightAndTransmittance.w;
                 
-                /*
-                if(rayHitDist<MAX_DIST)
-                {
-                    col.r = 1;
-                }*/
             
-                return col;
+                return float4(lightAndTransmittance.x,lightAndTransmittance.y,lightAndTransmittance.z,a);
             }
             ENDCG
         }
