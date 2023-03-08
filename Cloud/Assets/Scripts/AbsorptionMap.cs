@@ -37,8 +37,8 @@ public class AbsorptionMap : MonoBehaviour
         Vector2 uvPosition = new Vector2(samplePosition.x / bounds.x * xy.width,
                                             samplePosition.y / bounds.y * xy.height);
         grayscale = xy.GetPixel(Mathf.RoundToInt(uvPosition.x), 
-            Mathf.RoundToInt(uvPosition.y)).grayscale;
-        float concentration = 1 - grayscale;
+            Mathf.RoundToInt(uvPosition.y)).a;
+        float concentration = grayscale;
         return concentration*concentrationFactor*attenuationFactor;
     }
 }

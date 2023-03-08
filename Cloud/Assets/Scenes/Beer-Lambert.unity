@@ -412,7 +412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46911e25fc0fa3546a317103dea0b3e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xy: {fileID: 2800000, guid: d934b1a0a49e5b649a9cceb80dc1c43d, type: 3}
+  xy: {fileID: 2800000, guid: 1f6d663567d3f5b499183aca0bf96353, type: 3}
   bounds: {x: 1, y: 1, z: 1}
   concentrationFactor: 3
   attenuationFactor: 3
