@@ -59,6 +59,7 @@
     <Compile Include="Assets\Scripts\lightBehavior.cs" />
     <Compile Include="Assets\Scripts\AbsorptionMap.cs" />
     <Compile Include="Assets\Scripts\calculateAbsorbance.cs" />
+    <Compile Include="Assets\BoxMovement.cs" />
     <Compile Include="Assets\Scripts\ligthScattering.cs" />
   </ItemGroup>
   <ItemGroup>
