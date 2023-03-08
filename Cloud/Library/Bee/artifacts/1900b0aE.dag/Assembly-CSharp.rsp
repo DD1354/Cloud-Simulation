@@ -352,6 +352,7 @@
 "Assets/Scripts/calculateAbsorbance.cs"
 "Assets/Scripts/DensityMap.cs"
 "Assets/Scripts/lightBehavior.cs"
+"Assets/Scripts/ligthScattering.cs"
 -langversion:9.0
 
 /deterministic

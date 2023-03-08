@@ -36,9 +36,10 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\calculateAbsorbance.cs" />
      <Compile Include="Assets\Scripts\lightBehavior.cs" />
      <Compile Include="Assets\Scripts\DensityMap.cs" />
+     <Compile Include="Assets\Scripts\calculateAbsorbance.cs" />
+     <Compile Include="Assets\Scripts\ligthScattering.cs" />
      <None Include="Assets\Shaders\NewImageEffectShader.shader" />
      <None Include="Assets\Shaders\NewUnlitShader.shader" />
      <None Include="Assets\Shaders\CloudShader.shader" />
