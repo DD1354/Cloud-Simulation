@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class lightBehavior : MonoBehaviour
 {
-    [SerializeField] private int m_segmentCount = 20;
+    //[SerializeField] private int m_segmentCount = 20;
+    [SerializeField] private float m_segmentLength = 0.01f;
     [SerializeField] private float m_rayLength = 4f;
     [SerializeField] private GameObject m_cloud;
     [SerializeField] private GameObject m_line;
@@ -78,20 +79,20 @@ public class lightBehavior : MonoBehaviour
         ChangeLineColor(lastUpdatedLine, currentLine, rayColor);
 
 
-        float stepLength = m_absorptionMap.Bounds.x / m_segmentCount;
+        //float stepLength = m_absorptionMap.Bounds.x / m_segmentCount;
+        int steps = Mathf.RoundToInt(m_absorptionMap.Bounds.x / m_segmentLength);
         float riemannsum = 0;
 
-        int linesPerStepLength = Mathf.RoundToInt(stepLength / m_lineSize);
+        int linesPerStepLength = Mathf.RoundToInt(m_segmentLength / m_lineSize);
         lastUpdatedLine = currentLine;
 
-        for (int i = 0; i < m_segmentCount; i++){
-            samplePosition += (transform.forward * stepLength);
-
+        for (int i = 0; i < steps; i++){
+            samplePosition += (transform.forward * m_segmentLength);
             if (i == 0)
                 continue;
             float absorption = m_absorptionMap.GetAbsorption(new Vector2(samplePosition.z, samplePosition.y));
 
-            riemannsum += absorption * stepLength;
+            riemannsum += absorption * m_segmentLength;
             Debug.Log(riemannsum);
             currentLine += linesPerStepLength;
             rayColor.a = Mathf.Pow(10, -riemannsum);
