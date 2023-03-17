@@ -15,7 +15,7 @@ public class ligthScattering : MonoBehaviour
 
     [SerializeField]
     private int noOfSamples = 20;
-    private float[] samplePoints;
+    private float[] sampleAngles;
     
     private Vector3 origin = new Vector3(0,0,0);
 
@@ -24,9 +24,9 @@ public class ligthScattering : MonoBehaviour
     void Start()
     {
         float sampleIncrease = (2*Mathf.PI) / noOfSamples;
-        samplePoints = new float[noOfSamples];
+        sampleAngles = new float[noOfSamples];
         for(int i = 0; i < noOfSamples; i++){
-            samplePoints[i] = i*sampleIncrease;
+            sampleAngles[i] = i*sampleIncrease;
         }
 
         lr = GetComponent<LineRenderer>();   
@@ -40,27 +40,27 @@ public class ligthScattering : MonoBehaviour
     
     void ScatterLight(){
         
-        foreach(float x in samplePoints){
-            Vector3 line = new Vector3(0, Mathf.Sin(x), Mathf.Cos(x));
-            float dist = henyeyGreenstein(origin.x + x);
+        foreach(float angle in sampleAngles){
+            Vector3 line = new Vector3(0, Mathf.Sin(angle), Mathf.Cos(angle));
+            float dist = henyeyGreenstein(angle);
             line *= dist;
             Debug.DrawLine(origin, line, Color.white);
             if(threeDimension){
-                foreach(float y in samplePoints){
+                foreach(float y in sampleAngles){
                     Debug.DrawLine(origin, Quaternion.Euler(0, 0, y * Mathf.Rad2Deg) * line, Color.white);
                 }
             }
-            //Debug.Log(henyeyGreenstein(origin.x + xVal));
+            //Debug.Log(henyeyGreenstein(origin.angle + angleVal));
         }
 
-        // Call henyey with a sampled x position (relative to the dir of the light ray)
+        // Call henyey with a sampled angle position (relative to the dir of the light ray)
         // return is the dir in both y and z
         // Point of origin is the point from which we're referencing
     }
 
-    float henyeyGreenstein(float x){
+    float henyeyGreenstein(float angle){
         return  (1 / (4 * Mathf.PI)) * 
                 (1 - Mathf.Pow(m_scatter,2)) / 
-                Mathf.Pow((1 + Mathf.Pow(m_scatter,2) - (2 * m_scatter * Mathf.Cos(x))),(3 / 2));
+                Mathf.Pow((1 + Mathf.Pow(m_scatter,2) - (2 * m_scatter * Mathf.Cos(angle))),(3 / 2));
     }
 }
